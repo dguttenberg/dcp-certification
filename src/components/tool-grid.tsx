@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 interface Tool {
   name: string
@@ -15,18 +16,18 @@ interface ToolGridProps {
 }
 
 function AccessBadge({ access }: { access: string }) {
-  let colors = 'bg-surface-100 text-surface-600'
+  let colors = 'bg-surface-100 text-surface-600 border-surface-200'
 
   if (access === 'Everyone') {
-    colors = 'bg-green-100 text-green-700'
+    colors = 'bg-aurora-green/15 text-accent-800 border-aurora-green/30'
   } else if (access === 'Managed access') {
-    colors = 'bg-blue-100 text-blue-700'
+    colors = 'bg-aurora-violet/15 text-aurora-violet border-aurora-violet/30'
   } else if (access === 'Network-level') {
-    colors = 'bg-purple-100 text-purple-700'
+    colors = 'bg-sky/20 text-midnight border-sky/40'
   }
 
   return (
-    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${colors}`}>
+    <span className={`inline-block text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-0.5 rounded-full border ${colors}`}>
       {access}
     </span>
   )
@@ -40,7 +41,7 @@ export default function ToolGrid({ tools }: ToolGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {tools.map((tool, index) => {
         const isExpanded = expandedIndex === index
 
@@ -51,38 +52,41 @@ export default function ToolGrid({ tools }: ToolGridProps) {
             className={`
               text-left rounded-xl border transition-all duration-200
               ${isExpanded
-                ? 'border-brand-300 bg-brand-50/40 shadow-md'
-                : 'border-surface-200 bg-white hover:shadow-sm hover:border-surface-300'
+                ? 'border-aurora-violet bg-aurora-violet/5 shadow-md'
+                : 'border-surface-200 bg-white hover:shadow-sm hover:border-aurora-violet/40'
               }
             `}
           >
-            <div className="p-5">
-              {/* Card header */}
+            <div className="p-4">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl leading-none" role="img">
+                  <span className="text-2xl leading-none" role="img">
                     {tool.icon}
                   </span>
                   <div>
-                    <h3 className="font-semibold text-surface-900 text-sm">
+                    <h3 className="font-bold text-midnight text-sm tracking-tight">
                       {tool.name}
                     </h3>
-                    <p className="text-xs text-surface-500 mt-0.5 leading-relaxed">
+                    <p className="text-xs text-surface-600 mt-0.5 leading-relaxed">
                       {tool.summary}
                     </p>
                   </div>
                 </div>
-                <AccessBadge access={tool.access} />
+                <div className="flex items-center gap-1.5">
+                  <AccessBadge access={tool.access} />
+                  <ChevronDown
+                    className={`w-4 h-4 text-surface-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  />
+                </div>
               </div>
 
-              {/* Expandable detail */}
               <div
                 className={`
                   overflow-hidden transition-all duration-300 ease-out
                   ${isExpanded ? 'max-h-64 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}
                 `}
               >
-                <div className="pt-3 border-t border-surface-200">
+                <div className="pt-3 border-t border-aurora-violet/20">
                   <p className="text-sm text-surface-700 leading-relaxed">
                     {tool.detail}
                   </p>

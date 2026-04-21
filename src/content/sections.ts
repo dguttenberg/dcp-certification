@@ -14,6 +14,11 @@ export interface Card {
   type: CardType;
 }
 
+export interface InlineCallout {
+  text: string;
+  style?: 'insight' | 'warning' | 'tip';  // default 'insight'
+}
+
 export interface HeroCard extends Card {
   type: 'hero';
   image: string;
@@ -25,6 +30,7 @@ export interface TextCard extends Card {
   type: 'text';
   heading?: string;
   body: string;  // Keep SHORT. Max ~80 words. This is one concept per card.
+  callout?: InlineCallout;  // Optional inline callout rendered below the body
 }
 
 export interface CalloutCard extends Card {
@@ -49,6 +55,7 @@ export interface ToolGridCard extends Card {
     detail: string;   // 2-3 sentences when expanded
     access: string;   // "Everyone" | "Managed access" | "Network-level"
   }[];
+  callout?: InlineCallout;
 }
 
 export interface PromptCompareCard extends Card {
@@ -111,12 +118,10 @@ export const sections: Section[] = [
         type: 'text',
         heading: 'It generates, it doesn\'t retrieve',
         body: 'When you ask AI something, it doesn\'t look up an answer in a database. It constructs a response that fits the pattern of what a good answer looks like, based on everything it was trained on. Most of the time this is genuinely impressive. Sometimes it\'s wrong in ways that aren\'t obvious. The model itself has no way to flag the difference.',
-      },
-      {
-        id: 's1-callout-1',
-        type: 'callout',
-        text: 'Think of it less like a librarian and more like a very confident improv performer. Usually great. Occasionally makes things up with total conviction.',
-        style: 'insight',
+        callout: {
+          text: 'Think of it less like a librarian and more like a very confident improv performer. Usually great. Occasionally makes things up with total conviction.',
+          style: 'insight',
+        },
       },
       {
         id: 's1-trust-grid',
@@ -205,12 +210,10 @@ export const sections: Section[] = [
         type: 'text',
         heading: 'Crafting the future, not reacting to it',
         body: 'When we stop just using AI to accelerate individual tasks and start reimagining how things actually get done, that\'s when things change for an agency. Not "AI will take our jobs" panic. Not "AI is just a tool" dismissiveness. Something more practical: the people and teams who learn to see the whole arc from insight to output — who understand how work flows end to end — will build things that weren\'t possible before. This is also where agents come in: AI systems that don\'t just answer questions but take sequences of actions autonomously. That\'s coming, and it will matter. But the foundation is learning to use what\'s already here well.',
-      },
-      {
-        id: 's1-callout-2',
-        type: 'callout',
-        text: 'This is mandatory training. But everything that follows builds on what you just read. This is the foundation for the rest of the course — and it\'s worth having it click now rather than later.',
-        style: 'tip',
+        callout: {
+          text: 'This is mandatory training. But everything that follows builds on what you just read. This is the foundation for the rest of the course — and it\'s worth having it click now rather than later.',
+          style: 'tip',
+        },
       },
       {
         id: 's1-summary',
@@ -257,12 +260,10 @@ export const sections: Section[] = [
         type: 'text',
         heading: 'Enterprise tools vs. consumer tools: one rule',
         body: 'The enterprise agreements that Stagwell has negotiated with our approved tool providers include data protection provisions. Your inputs are not used for training. Client information doesn\'t leave the environment. That protection exists because someone negotiated it explicitly into the contract. A $20 personal ChatGPT subscription doesn\'t come with that protection. The guardrail is which tool you use, not how much you paste into it. If you\'re in an approved tool with enterprise protections, paste the full brief. Give it everything it needs to do the job well. The agreement covers you. The protection is in the contract, not in self-censoring your inputs.',
-      },
-      {
-        id: 's2-callout-2',
-        type: 'callout',
-        text: 'Your personal AI account and your work AI account are not the same thing, the way your personal Instagram and your work email are not the same thing. You wouldn\'t DM a client brief to your friends. Don\'t paste one into a tool that doesn\'t have enterprise protections.',
-        style: 'insight',
+        callout: {
+          text: 'Your personal AI account and your work AI account are not the same thing, the way your personal Instagram and your work email are not the same thing. You wouldn\'t DM a client brief to your friends. Don\'t paste one into a tool that doesn\'t have enterprise protections.',
+          style: 'insight',
+        },
       },
       {
         id: 's2-scenario-1',
@@ -386,12 +387,10 @@ export const sections: Section[] = [
             access: 'Network-level',
           },
         ],
-      },
-      {
-        id: 's3-callout-2',
-        type: 'callout',
-        text: 'Yes, this certification was built with Claude. We practice what we preach.',
-        style: 'tip',
+        callout: {
+          text: 'Yes, this certification was built with Claude. We practice what we preach.',
+          style: 'tip',
+        },
       },
       {
         id: 's3-scenario-1',
@@ -669,20 +668,16 @@ export const sections: Section[] = [
         body: 'The real power of AI isn\'t in single prompts — it\'s in building context across a conversation. Each prompt builds on the last. You start broad and go deeper, all in one thread where AI carries the context forward. This is fundamentally different from using AI as a search engine. It\'s a working session where depth compounds with every step.\n\nImagine you\'re preparing for a quarterly client review:\n\n"Summarize the last 3 months of project updates from this document." → "Now identify recurring themes and any risks that show up more than once." → "Draft talking points for a quarterly review that address the risks proactively and highlight the strongest progress areas." → "Write a meeting agenda that puts the most important conversations first."\n\nEach step goes deeper. The summary gives AI raw material. The themes extract what matters. The talking points apply judgment. The agenda structures it for action. By step four, AI isn\'t working from a blank page — it\'s working from everything the conversation has built. That\'s not something you get from four separate conversations.',
       },
 
-      // Authorship callout
-      {
-        id: 's5-callout-1',
-        type: 'callout',
-        text: 'You are always the author. AI is the instrument, not the musician.',
-        style: 'insight',
-      },
-
-      // Bringing your POV
+      // Bringing your POV — with the "author" insight as an inline callout
       {
         id: 's5-text-9',
         type: 'text',
         heading: 'The most common mistake isn\'t bad prompting — it\'s absent thinking',
         body: 'The biggest failure mode with AI isn\'t vague prompts. It\'s outsourcing your point of view. If you hand AI a task without your own perspective on what good looks like, you\'ll get something competent, pattern-matched, and generic. The people who get genuinely great output from AI are the ones who bring their own editorial judgment, taste, and strategic opinion into the conversation. AI amplifies whatever you bring. If you bring nothing, it amplifies nothing.',
+        callout: {
+          text: 'You are always the author. AI is the instrument, not the musician.',
+          style: 'insight',
+        },
       },
 
       // Scenario
@@ -749,12 +744,10 @@ export const sections: Section[] = [
         id: 's6-text-1',
         type: 'text',
         body: 'Using AI well involves a lot of in-the-moment judgment. Most of the time you\'ll know what\'s right. But sometimes you\'ll hit a situation where something feels uncertain, and knowing what to do next matters more than knowing the answer yourself.',
-      },
-      {
-        id: 's6-callout-1',
-        type: 'callout',
-        text: 'A five-minute conversation now prevents a five-alarm email later.',
-        style: 'warning',
+        callout: {
+          text: 'A five-minute conversation now prevents a five-alarm email later.',
+          style: 'warning',
+        },
       },
       {
         id: 's6-text-2',

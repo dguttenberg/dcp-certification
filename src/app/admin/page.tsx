@@ -56,21 +56,21 @@ export default function AdminPage() {
   // ---- Access gate ----
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-50">
-        <div className="animate-pulse text-surface-400 text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-offwhite">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-aurora-violet/30 border-t-aurora-violet" />
       </div>
     )
   }
 
   if (!user || user.role !== 'admin') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-50">
+      <div className="min-h-screen flex items-center justify-center bg-offwhite">
         <div className="text-center max-w-md mx-auto p-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-red-500" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ember/15 border-2 border-ember flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-ember" />
           </div>
-          <h1 className="text-2xl font-bold text-surface-900 mb-2">Access Denied</h1>
-          <p className="text-surface-600">
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-midnight mb-2">Access Denied</h1>
+          <p className="text-surface-700">
             You do not have permission to view this page. Admin access is required.
           </p>
         </div>
@@ -123,9 +123,9 @@ export default function AdminPage() {
     if (sortKey !== column)
       return <ChevronUp className="w-3 h-3 text-surface-300 inline ml-1" />
     return sortDir === 'asc' ? (
-      <ChevronUp className="w-3 h-3 text-brand-700 inline ml-1" />
+      <ChevronUp className="w-3 h-3 text-aurora-violet inline ml-1" />
     ) : (
-      <ChevronDown className="w-3 h-3 text-brand-700 inline ml-1" />
+      <ChevronDown className="w-3 h-3 text-aurora-violet inline ml-1" />
     )
   }
 
@@ -175,46 +175,62 @@ export default function AdminPage() {
       label: 'Total Enrolled',
       value: stats.total,
       icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-aurora-violet',
+      bg: 'bg-aurora-violet/10',
     },
     {
       label: 'Completed',
       value: stats.completed,
       icon: Award,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
+      color: 'text-accent-700',
+      bg: 'bg-aurora-green/15',
     },
     {
       label: 'In Progress',
       value: stats.inProgress,
       icon: Clock,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
+      color: 'text-ember',
+      bg: 'bg-ember/10',
     },
     {
       label: 'Not Started',
       value: stats.notStarted,
       icon: AlertCircle,
-      color: 'text-gray-500',
-      bg: 'bg-gray-50',
+      color: 'text-surface-500',
+      bg: 'bg-surface-100',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-surface-50 py-10 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-offwhite">
+      {/* DCP header strip */}
+      <header className="bg-midnight border-b border-aurora-green/10 px-6 md:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="dcp-logo">
+            <span className="dcp-logo-mark">DCP</span>
+            <span className="dcp-logo-wordmark">Doner<br />Colle<br />Partners.</span>
+          </div>
+          <span className="hidden sm:block text-[11px] font-bold tracking-[0.2em] uppercase text-aurora-green/80">
+            Admin
+          </span>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto py-10 px-4 md:px-8">
+        {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-surface-900">Admin Dashboard</h1>
-            <p className="text-surface-600 mt-1">
-              DCP AI Foundations Certification progress overview
+            <span className="dcp-eyebrow">Admin Dashboard</span>
+            <h1 className="mt-2 text-3xl md:text-4xl font-bold uppercase tracking-tight text-midnight">
+              Certification Progress
+            </h1>
+            <p className="text-surface-700 mt-2">
+              DCP AI Foundations Certification overview.
             </p>
           </div>
           <button
             onClick={handleExport}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-lg font-medium hover:bg-brand-800 transition-colors shadow-sm"
+            className="dcp-btn-primary"
           >
             <Download className="w-4 h-4" />
             Export to CSV
@@ -235,8 +251,8 @@ export default function AdminPage() {
                   <card.icon className={`w-5 h-5 ${card.color}`} />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-surface-900">{card.value}</p>
-              <p className="text-sm text-surface-500 mt-1">{card.label}</p>
+              <p className="text-3xl font-bold text-midnight">{card.value}</p>
+              <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-surface-500 mt-1">{card.label}</p>
             </div>
           ))}
         </div>
@@ -244,14 +260,14 @@ export default function AdminPage() {
         {/* Filter bar */}
         <div className="bg-white rounded-xl border border-surface-200 shadow-sm mb-6 p-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2 text-surface-500">
+            <div className="flex items-center gap-2 text-aurora-violet">
               <Filter className="w-4 h-4" />
-              <span className="text-sm font-medium">Filters</span>
+              <span className="text-[11px] font-bold tracking-[0.15em] uppercase">Filters</span>
             </div>
             <select
               value={agencyFilter}
               onChange={(e) => setAgencyFilter(e.target.value)}
-              className="text-sm border border-surface-300 rounded-lg px-3 py-2 text-surface-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 focus:border-brand-400"
+              className="text-sm border border-surface-300 rounded-lg px-3 py-2 text-surface-700 bg-white focus:outline-none focus:ring-2 focus:ring-aurora-violet/30 focus:border-aurora-violet"
             >
               <option value="all">All Agencies</option>
               <option value="Doner">Doner</option>
@@ -261,14 +277,14 @@ export default function AdminPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="text-sm border border-surface-300 rounded-lg px-3 py-2 text-surface-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 focus:border-brand-400"
+              className="text-sm border border-surface-300 rounded-lg px-3 py-2 text-surface-700 bg-white focus:outline-none focus:ring-2 focus:ring-aurora-violet/30 focus:border-aurora-violet"
             >
               <option value="all">All Statuses</option>
               <option value="not-started">Not Started</option>
               <option value="in-progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
-            <span className="text-xs text-surface-400 ml-auto">
+            <span className="text-xs text-surface-500 ml-auto">
               {filtered.length} of {data.length} users
             </span>
           </div>
@@ -279,39 +295,39 @@ export default function AdminPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-surface-200 bg-surface-50">
+                <tr className="border-b-2 border-aurora-green bg-midnight">
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('full_name')}
                   >
                     Name <SortIcon column="full_name" />
                   </th>
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('email')}
                   >
                     Email <SortIcon column="email" />
                   </th>
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('agency')}
                   >
                     Agency <SortIcon column="agency" />
                   </th>
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('sections_completed')}
                   >
                     Sections <SortIcon column="sections_completed" />
                   </th>
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('quiz_passed')}
                   >
                     Passed <SortIcon column="quiz_passed" />
                   </th>
                   <th
-                    className="text-left px-4 py-3 font-semibold text-surface-700 cursor-pointer select-none whitespace-nowrap"
+                    className="text-left px-4 py-3.5 text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-green cursor-pointer select-none whitespace-nowrap"
                     onClick={() => toggleSort('last_activity')}
                   >
                     Completion Date <SortIcon column="last_activity" />
@@ -324,34 +340,34 @@ export default function AdminPage() {
                     key={u.id}
                     className={`border-b border-surface-100 ${
                       i % 2 === 0 ? 'bg-white' : 'bg-surface-50/50'
-                    } hover:bg-brand-50/30 transition-colors`}
+                    } hover:bg-aurora-violet/5 transition-colors`}
                   >
-                    <td className="px-4 py-3 font-medium text-surface-900 whitespace-nowrap">
+                    <td className="px-4 py-3 font-semibold text-midnight whitespace-nowrap">
                       {u.full_name}
                     </td>
-                    <td className="px-4 py-3 text-surface-600 whitespace-nowrap">
+                    <td className="px-4 py-3 text-surface-700 whitespace-nowrap">
                       {u.email}
                     </td>
-                    <td className="px-4 py-3 text-surface-600 whitespace-nowrap">
+                    <td className="px-4 py-3 text-surface-700 whitespace-nowrap">
                       {u.agency}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-surface-700">
+                      <span className="text-surface-700 tabular-nums">
                         {u.sections_completed}/{u.total_sections}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {u.quiz_passed ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase bg-aurora-green/15 text-accent-800 border border-aurora-green/30">
                           Yes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-100 text-surface-500">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase bg-surface-100 text-surface-500 border border-surface-200">
                           No
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-surface-600 whitespace-nowrap">
+                    <td className="px-4 py-3 text-surface-700 whitespace-nowrap">
                       {u.status === 'completed' ? formatDate(u.last_activity) : '--'}
                     </td>
                   </tr>

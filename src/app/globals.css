@@ -3,19 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a2e;
+  /* DCP brand palette */
+  --dcp-midnight:     #000531;
+  --dcp-grey:         #E6E7E8;
+  --dcp-violet:       #545DFF;
+  --dcp-green:        #20FE8F;
+  --dcp-sky:          #76BEFF;
+  --dcp-ember:        #FF8371;
+  --dcp-white:        #FFFFFF;
+  --dcp-offwhite:     #F4F5F7;
+
+  --dcp-green-a15:    rgba(32, 254, 143, 0.15);
+  --dcp-green-a30:    rgba(32, 254, 143, 0.30);
+  --dcp-violet-a20:   rgba(84, 93, 255, 0.20);
+  --dcp-violet-a10:   rgba(84, 93, 255, 0.10);
+  --dcp-ember-a20:    rgba(255, 131, 113, 0.20);
+  --dcp-midnight-a80: rgba(0, 5, 49, 0.80);
+
+  --background: var(--dcp-offwhite);
+  --foreground: var(--dcp-midnight);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-dm-sans), "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-bold tracking-tight;
+    font-family: var(--font-dm-sans), "Helvetica Neue", Arial, sans-serif;
   }
   h1 { @apply text-3xl md:text-4xl; }
   h2 { @apply text-2xl md:text-3xl; }
@@ -23,20 +41,118 @@ body {
 }
 
 @layer components {
+  /* DCP logo lockup */
+  .dcp-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1;
+  }
+  .dcp-logo-mark {
+    font-family: var(--font-dm-sans), sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+    color: var(--dcp-green);
+    line-height: 1;
+  }
+  .dcp-logo-wordmark {
+    font-family: var(--font-dm-sans), sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--dcp-white);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    padding-left: 12px;
+  }
+  .dcp-logo.dcp-logo--light .dcp-logo-mark {
+    color: var(--dcp-midnight);
+  }
+  .dcp-logo.dcp-logo--light .dcp-logo-wordmark {
+    color: var(--dcp-midnight);
+    border-left-color: rgba(0, 5, 49, 0.2);
+  }
+
+  .dcp-eyebrow {
+    font-family: var(--font-dm-sans), sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dcp-violet);
+  }
+  .dcp-eyebrow--green { color: var(--dcp-green); }
+
+  .dcp-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--dcp-green);
+    color: var(--dcp-midnight);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border-radius: 40px;
+    transition: opacity 0.2s, transform 0.1s;
+    cursor: pointer;
+  }
+  .dcp-btn-primary:hover { opacity: 0.88; }
+  .dcp-btn-primary:active { transform: scale(0.98); }
+  .dcp-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .dcp-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--dcp-green);
+    border: 1.5px solid var(--dcp-green);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 30px;
+    border-radius: 40px;
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+  }
+  .dcp-btn-secondary:hover {
+    background: var(--dcp-green);
+    color: var(--dcp-midnight);
+  }
+
+  .dcp-gradient-dark {
+    background:
+      radial-gradient(ellipse at 15% 85%, rgba(84,93,255,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 15%, rgba(32,254,143,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 55%, rgba(255,131,113,0.12) 0%, transparent 60%),
+      var(--dcp-midnight);
+  }
+
+  .dcp-gradient-light {
+    background:
+      radial-gradient(ellipse at 25% 75%, rgba(84,93,255,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 25%, rgba(32,254,143,0.07) 0%, transparent 50%),
+      var(--dcp-offwhite);
+  }
+
   .section-prose {
     @apply text-surface-700 leading-relaxed space-y-5;
   }
   .section-prose h3 {
-    @apply text-lg font-semibold text-surface-900 mt-8 mb-3;
+    @apply text-lg font-bold text-surface-900 mt-8 mb-3;
   }
   .section-prose h4 {
-    @apply text-base font-semibold text-surface-800 mt-6 mb-2 italic;
+    @apply text-base font-semibold text-surface-800 mt-6 mb-2;
   }
   .section-prose p {
     @apply text-base leading-7;
-  }
-  .section-prose em {
-    @apply text-surface-600 not-italic font-medium;
   }
 }
 

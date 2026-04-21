@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { Check } from 'lucide-react'
 
 interface SummaryCardProps {
   heading: string
@@ -22,16 +22,19 @@ export default function SummaryCard({ heading, points }: SummaryCardProps) {
   }, [visibleCount, points.length])
 
   return (
-    <div className="rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 border border-brand-200 overflow-hidden">
-      {/* Left accent bar + content */}
-      <div className="border-l-4 border-brand-500 pl-6 pr-6 py-6">
-        {/* Heading */}
-        <h3 className="text-lg font-bold text-brand-900 mb-4">
+    <div className="relative rounded-2xl overflow-hidden bg-midnight border border-aurora-violet/30 shadow-xl">
+      {/* Atmospheric accents */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-aurora-violet/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-aurora-green/10 blur-3xl pointer-events-none" />
+
+      <div className="relative p-8 sm:p-10">
+        <span className="dcp-eyebrow dcp-eyebrow--green">Key Takeaways</span>
+        <h3 className="mt-2 text-xl sm:text-2xl font-bold text-white uppercase tracking-tight">
           {heading}
         </h3>
+        <div className="mt-3 w-10 h-[3px] bg-aurora-green rounded-full" />
 
-        {/* Points */}
-        <ul className="space-y-3">
+        <ul className="mt-6 space-y-4">
           {points.map((point, index) => (
             <li
               key={index}
@@ -46,8 +49,10 @@ export default function SummaryCard({ heading, points }: SummaryCardProps) {
                 transitionDelay: `${index * 80}ms`,
               }}
             >
-              <CheckCircle2 className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-surface-800 leading-relaxed">
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-aurora-green/20 flex items-center justify-center flex-shrink-0">
+                <Check className="w-3 h-3 text-aurora-green" strokeWidth={3} />
+              </span>
+              <span className="text-sm sm:text-base text-white/85 leading-relaxed">
                 {point}
               </span>
             </li>

@@ -11,47 +11,63 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+
+        // DCP brand palette
+        midnight: "#000531",
+        aurora: {
+          green: "#20FE8F",
+          violet: "#545DFF",
+        },
+        sky: "#76BEFF",
+        ember: "#FF8371",
+        offwhite: "#F4F5F7",
+
+        // brand / surface scales remapped onto DCP palette
         brand: {
-          50: "#f0f4ff",
-          100: "#dbe4ff",
-          200: "#bac8ff",
-          300: "#91a7ff",
-          400: "#748ffc",
-          500: "#5c7cfa",
-          600: "#4c6ef5",
-          700: "#4263eb",
-          800: "#3b5bdb",
-          900: "#364fc7",
-          950: "#1e3a8a",
+          50: "#EEF0FF",
+          100: "#DADDFF",
+          200: "#B6BCFF",
+          300: "#8E96FF",
+          400: "#6E78FF",
+          500: "#545DFF", // aurora violet
+          600: "#4048E0",
+          700: "#2E34B8",
+          800: "#1B2080",
+          900: "#0D1154",
+          950: "#000531", // midnight
         },
         accent: {
-          50: "#fff9db",
-          100: "#fff3bf",
-          200: "#ffec99",
-          300: "#ffe066",
-          400: "#ffd43b",
-          500: "#fcc419",
-          600: "#fab005",
-          700: "#f59f00",
-          800: "#f08c00",
-          900: "#e67700",
+          50: "#E7FFF3",
+          100: "#BDFFDD",
+          200: "#8EFEC3",
+          300: "#5CFEAB",
+          400: "#38FE9C",
+          500: "#20FE8F", // aurora green
+          600: "#0DE27A",
+          700: "#0AB864",
+          800: "#088E4E",
+          900: "#056638",
         },
         surface: {
-          50: "#f8f9fa",
-          100: "#f1f3f5",
-          200: "#e9ecef",
-          300: "#dee2e6",
-          400: "#ced4da",
-          500: "#adb5bd",
-          600: "#868e96",
-          700: "#495057",
-          800: "#343a40",
-          900: "#212529",
+          50: "#F4F5F7",  // off-white
+          100: "#EAECEF",
+          200: "#E6E7E8", // dcp cool grey
+          300: "#C8CACD",
+          400: "#9FA2A7",
+          500: "#6F7378",
+          600: "#4A4D52",
+          700: "#2F3238",
+          800: "#14162B",
+          900: "#000531", // midnight
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
+      },
+      borderRadius: {
+        pill: "40px",
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out",

@@ -17,6 +17,7 @@ import type {
   PromptCompareCard,
   ExampleCard,
   SummaryCard,
+  InlineCallout,
 } from '@/content/sections'
 import ScenarioCardComponent from '@/components/scenario-card'
 import ToolGrid from '@/components/tool-grid'
@@ -74,7 +75,6 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
     if (user) checkProgress()
   }, [user, checkProgress])
 
-  // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'ArrowRight' || e.key === ' ') {
@@ -118,17 +118,17 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
 
   if (loading || !user || !mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-50">
-        <div className="w-8 h-8 border-2 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-offwhite">
+        <div className="w-8 h-8 border-2 border-aurora-violet/30 border-t-aurora-violet rounded-full animate-spin" />
       </div>
     )
   }
 
   if (!section) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-50 gap-4">
-        <p className="text-surface-500">Section not found.</p>
-        <Link href="/course" className="text-brand-600 hover:text-brand-700 font-medium text-sm">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-offwhite gap-4">
+        <p className="text-surface-600">Section not found.</p>
+        <Link href="/course" className="dcp-btn-secondary" style={{ color: '#000531', borderColor: '#000531' }}>
           Back to Course
         </Link>
       </div>
@@ -141,30 +141,31 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
   const progress = ((currentCardIndex + 1) / totalCards) * 100
 
   return (
-    <div className="min-h-screen bg-surface-50 flex flex-col">
+    <div className="min-h-screen bg-offwhite flex flex-col">
       {/* Top bar */}
-      <header className="bg-white border-b border-surface-200 sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <header className="bg-midnight sticky top-0 z-20 border-b border-aurora-green/10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <Link
             href="/course"
-            className="flex items-center gap-1.5 text-sm text-surface-500 hover:text-surface-700 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.15em] uppercase text-white/60 hover:text-aurora-green transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Course</span>
+            <span className="hidden sm:inline">Back</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-surface-400 tabular-nums">
+          <div className="flex-1 flex items-center gap-3 justify-center max-w-md">
+            <span className="text-[11px] text-white/50 tabular-nums tracking-wider">
               {currentCardIndex + 1} / {totalCards}
             </span>
-            <div className="w-24 sm:w-40 h-1.5 rounded-full bg-surface-200 overflow-hidden">
+            <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full rounded-full bg-brand-600 transition-all duration-500 ease-out"
+                className="h-full rounded-full bg-aurora-green transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
-          <span className="text-xs text-surface-400">
-            Section {section.number} of {sections.length}
+          <span className="text-[11px] text-white/50 tracking-wider whitespace-nowrap">
+            <span className="hidden sm:inline">Section </span>
+            {section.number}/{sections.length}
           </span>
         </div>
       </header>
@@ -186,23 +187,22 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
       </div>
 
       {/* Bottom navigation */}
-      <footer className="bg-white border-t border-surface-200 sticky bottom-0 z-20">
+      <footer className="bg-white sticky bottom-0 z-20 border-t border-surface-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button
             onClick={goPrev}
             disabled={isFirstCard}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[11px] font-bold tracking-[0.1em] uppercase transition-all ${
               isFirstCard
                 ? 'text-surface-300 cursor-not-allowed'
-                : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'
+                : 'text-surface-600 hover:bg-surface-100'
             }`}
           >
             <ChevronLeft className="w-4 h-4" />
             Back
           </button>
 
-          <div className="flex items-center gap-2">
-            {/* Dot indicators — show a window of dots around current position */}
+          <div className="flex items-center gap-1.5">
             {section.cards.map((_, i) => (
               <button
                 key={i}
@@ -218,10 +218,10 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
                 }}
                 className={`rounded-full transition-all duration-300 ${
                   i === currentCardIndex
-                    ? 'w-6 h-2 bg-brand-600'
+                    ? 'w-6 h-1.5 bg-aurora-violet'
                     : i < currentCardIndex
-                      ? 'w-2 h-2 bg-brand-300'
-                      : 'w-2 h-2 bg-surface-300'
+                      ? 'w-1.5 h-1.5 bg-aurora-violet/40'
+                      : 'w-1.5 h-1.5 bg-surface-300'
                 } ${totalCards > 20 ? 'hidden sm:block' : ''}`}
                 aria-label={`Go to card ${i + 1}`}
               />
@@ -232,15 +232,15 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
             !isCompleted ? (
               <button
                 onClick={handleMarkComplete}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 active:scale-[0.98] transition-all shadow-sm"
+                className="dcp-btn-primary"
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4" strokeWidth={3} />
                 Complete
               </button>
             ) : nextSection ? (
               <Link
                 href={`/course/${nextSection.id}`}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all shadow-sm"
+                className="dcp-btn-primary"
               >
                 Next Section
                 <ChevronRight className="w-4 h-4" />
@@ -248,16 +248,16 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
             ) : (
               <Link
                 href="/course"
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all shadow-sm"
+                className="dcp-btn-primary"
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4" strokeWidth={3} />
                 Done
               </Link>
             )
           ) : (
             <button
               onClick={goNext}
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 active:scale-[0.98] transition-all shadow-sm"
+              className="dcp-btn-primary"
             >
               Next
               <ChevronRight className="w-4 h-4" />
@@ -271,7 +271,7 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
   function renderCard(card: SectionCard) {
     switch (card.type) {
       case 'hero':
-        return <HeroCardView card={card as HeroCard} />
+        return <HeroCardView card={card as HeroCard} number={section!.number} />
       case 'text':
         return <TextCardView card={card as TextCard} />
       case 'callout':
@@ -293,13 +293,50 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
 }
 
 // ─────────────────────────────────────────────
+// Inline Callout (rendered below TextCard / ToolGridCard)
+// ─────────────────────────────────────────────
+
+function InlineCalloutBlock({ callout }: { callout: InlineCallout }) {
+  const styles = {
+    insight: {
+      bg: 'bg-aurora-violet/10',
+      border: 'border-aurora-violet',
+      icon: <Lightbulb className="w-4 h-4 text-aurora-violet flex-shrink-0 mt-0.5" />,
+      text: 'text-midnight',
+    },
+    warning: {
+      bg: 'bg-ember/10',
+      border: 'border-ember',
+      icon: <AlertTriangle className="w-4 h-4 text-ember flex-shrink-0 mt-0.5" />,
+      text: 'text-midnight',
+    },
+    tip: {
+      bg: 'bg-aurora-green/10',
+      border: 'border-aurora-green',
+      icon: <Zap className="w-4 h-4 text-accent-700 flex-shrink-0 mt-0.5" />,
+      text: 'text-midnight',
+    },
+  }
+  const s = styles[callout.style ?? 'insight']
+
+  return (
+    <div className={`${s.bg} border-l-[3px] ${s.border} rounded-r-lg p-4 flex gap-3 items-start`}>
+      {s.icon}
+      <p className={`text-sm leading-relaxed ${s.text} italic`}>
+        {callout.text}
+      </p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Card Renderers
 // ─────────────────────────────────────────────
 
-function HeroCardView({ card }: { card: HeroCard }) {
+function HeroCardView({ card, number }: { card: HeroCard; number: number }) {
   return (
-    <div className="text-center space-y-6">
-      <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg">
+    <div className="space-y-6">
+      <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden shadow-xl border border-midnight/10">
         <Image
           src={card.image}
           alt={card.title}
@@ -307,18 +344,25 @@ function HeroCardView({ card }: { card: HeroCard }) {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-left">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
-            {card.title}
-          </h1>
-          <p className="mt-2 text-base sm:text-lg text-white/80">
-            {card.subtitle}
-          </p>
+        <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/40 to-transparent" />
+        <div className="absolute inset-0 flex flex-col justify-between p-6 sm:p-10">
+          <div className="flex items-center justify-between">
+            <span className="text-aurora-green text-[11px] font-bold tracking-[0.24em] uppercase">
+              Section {String(number).padStart(2, '0')}
+            </span>
+          </div>
+          <div>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white uppercase tracking-tight leading-[0.95]">
+              {card.title}
+            </h1>
+            <p className="mt-3 text-base sm:text-lg text-white/70 max-w-2xl">
+              {card.subtitle}
+            </p>
+          </div>
         </div>
       </div>
-      <p className="text-sm text-surface-400">
-        Press <kbd className="px-1.5 py-0.5 bg-surface-100 rounded text-xs font-mono">→</kbd> or click Next to continue
+      <p className="text-xs text-surface-500 text-center tracking-wider">
+        Press <kbd className="px-1.5 py-0.5 bg-surface-100 border border-surface-300 rounded text-[10px] font-mono">→</kbd> or click Next to continue
       </p>
     </div>
   )
@@ -326,15 +370,19 @@ function HeroCardView({ card }: { card: HeroCard }) {
 
 function TextCardView({ card }: { card: TextCard }) {
   return (
-    <div className="bg-white rounded-2xl border border-surface-200 shadow-sm p-8 sm:p-12 space-y-4">
+    <div className="bg-white rounded-2xl border border-surface-200 shadow-sm p-8 sm:p-12 space-y-6">
       {card.heading && (
-        <h2 className="text-xl sm:text-2xl font-bold text-surface-900 tracking-tight">
-          {card.heading}
-        </h2>
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-midnight tracking-tight uppercase">
+            {card.heading}
+          </h2>
+          <div className="mt-3 w-10 h-[3px] bg-aurora-green rounded-full" />
+        </div>
       )}
-      <p className="text-base sm:text-lg leading-relaxed text-surface-700">
+      <p className="text-base sm:text-lg leading-relaxed text-surface-700 whitespace-pre-line">
         {card.body}
       </p>
+      {card.callout && <InlineCalloutBlock callout={card.callout} />}
     </div>
   )
 }
@@ -342,19 +390,19 @@ function TextCardView({ card }: { card: TextCard }) {
 function CalloutCardView({ card }: { card: CalloutCard }) {
   const styles = {
     insight: {
-      bg: 'bg-brand-50/80',
-      border: 'border-brand-400',
-      icon: <Lightbulb className="w-5 h-5 text-brand-500 flex-shrink-0 mt-0.5" />,
+      bg: 'bg-aurora-violet/10',
+      border: 'border-aurora-violet',
+      icon: <Lightbulb className="w-5 h-5 text-aurora-violet flex-shrink-0 mt-0.5" />,
     },
     warning: {
-      bg: 'bg-amber-50/80',
-      border: 'border-amber-400',
-      icon: <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />,
+      bg: 'bg-ember/10',
+      border: 'border-ember',
+      icon: <AlertTriangle className="w-5 h-5 text-ember flex-shrink-0 mt-0.5" />,
     },
     tip: {
-      bg: 'bg-emerald-50/80',
-      border: 'border-emerald-400',
-      icon: <Zap className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />,
+      bg: 'bg-aurora-green/15',
+      border: 'border-aurora-green',
+      icon: <Zap className="w-5 h-5 text-accent-700 flex-shrink-0 mt-0.5" />,
     },
   }
   const s = styles[card.style ?? 'insight']
@@ -362,7 +410,7 @@ function CalloutCardView({ card }: { card: CalloutCard }) {
   return (
     <div className={`${s.bg} border-l-4 ${s.border} rounded-r-2xl p-8 sm:p-10 flex gap-4 items-start`}>
       {s.icon}
-      <p className="text-base sm:text-lg leading-relaxed text-surface-700 italic">
+      <p className="text-base sm:text-lg leading-relaxed text-midnight italic">
         {card.text}
       </p>
     </div>
@@ -371,11 +419,9 @@ function CalloutCardView({ card }: { card: CalloutCard }) {
 
 function ScenarioCardView({ card }: { card: ScenarioCard }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 text-sm font-semibold text-surface-500 uppercase tracking-wider">
-        <span className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center">
-          <span className="text-brand-600 text-xs">?</span>
-        </span>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 dcp-eyebrow">
+        <span className="w-6 h-6 rounded-full bg-aurora-violet text-white flex items-center justify-center text-xs font-bold">?</span>
         What would you do?
       </div>
       <ScenarioCardComponent situation={card.situation} options={card.options} />
@@ -385,21 +431,28 @@ function ScenarioCardView({ card }: { card: ScenarioCard }) {
 
 function ToolGridCardView({ card }: { card: ToolGridCard }) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl sm:text-2xl font-bold text-surface-900 tracking-tight">
-        {card.heading}
-      </h2>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-midnight tracking-tight uppercase">
+          {card.heading}
+        </h2>
+        <div className="mt-3 w-10 h-[3px] bg-aurora-green rounded-full" />
+      </div>
       <ToolGrid tools={card.tools} />
+      {card.callout && <InlineCalloutBlock callout={card.callout} />}
     </div>
   )
 }
 
 function PromptCompareCardView({ card }: { card: PromptCompareCard }) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl sm:text-2xl font-bold text-surface-900 tracking-tight">
-        {card.heading}
-      </h2>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-midnight tracking-tight uppercase">
+          {card.heading}
+        </h2>
+        <div className="mt-3 w-10 h-[3px] bg-aurora-green rounded-full" />
+      </div>
       <PromptCompare bad={card.bad} good={card.good} />
     </div>
   )
@@ -407,11 +460,11 @@ function PromptCompareCardView({ card }: { card: PromptCompareCard }) {
 
 function ExampleCardView({ card }: { card: ExampleCard }) {
   return (
-    <div className="bg-brand-50/60 border border-brand-100 rounded-2xl p-8 sm:p-10">
-      <span className="block text-xs font-semibold text-brand-500 uppercase tracking-wider mb-3">
+    <div className="bg-aurora-violet/10 border border-aurora-violet/20 rounded-2xl p-8 sm:p-10">
+      <span className="dcp-eyebrow block mb-3">
         {card.label}
       </span>
-      <p className="text-base sm:text-lg leading-relaxed text-surface-700">
+      <p className="text-base sm:text-lg leading-relaxed text-midnight">
         {card.text}
       </p>
     </div>

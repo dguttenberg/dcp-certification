@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, XCircle, HelpCircle } from 'lucide-react'
+import { CheckCircle2, XCircle } from 'lucide-react'
 
 interface ScenarioCardProps {
   situation: string
@@ -21,14 +21,10 @@ export default function ScenarioCard({ situation, options }: ScenarioCardProps) 
   const selectedCorrectly = hasAnswered && options[selectedIndex].correct
 
   return (
-    <div className="bg-white rounded-xl border border-surface-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-surface-200 overflow-hidden shadow-sm">
       {/* Header */}
       <div className="px-6 pt-6 pb-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-brand-600 mb-3">
-          <HelpCircle className="w-4 h-4" />
-          <span>What would you do?</span>
-        </div>
-        <p className="text-lg font-medium text-surface-900 leading-relaxed">
+        <p className="text-lg font-medium text-midnight leading-relaxed">
           {situation}
         </p>
       </div>
@@ -42,30 +38,30 @@ export default function ScenarioCard({ situation, options }: ScenarioCardProps) 
           let borderColor = 'border-surface-200'
           let bgColor = 'bg-white'
           let textColor = 'text-surface-700'
-          let cursor = 'cursor-pointer hover:border-brand-300 hover:shadow-sm'
+          let cursor = 'cursor-pointer hover:border-aurora-violet hover:shadow-sm'
           let icon = null
 
           if (hasAnswered) {
             cursor = 'cursor-default'
 
             if (isSelected && isCorrectOption) {
-              borderColor = 'border-green-400'
-              bgColor = 'bg-green-50'
-              textColor = 'text-green-900'
-              icon = <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+              borderColor = 'border-aurora-green'
+              bgColor = 'bg-aurora-green/10'
+              textColor = 'text-midnight'
+              icon = <CheckCircle2 className="w-5 h-5 text-accent-700 flex-shrink-0" />
             } else if (isSelected && !isCorrectOption) {
-              borderColor = 'border-red-400'
-              bgColor = 'bg-red-50'
-              textColor = 'text-red-900'
-              icon = <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              borderColor = 'border-ember'
+              bgColor = 'bg-ember/10'
+              textColor = 'text-midnight'
+              icon = <XCircle className="w-5 h-5 text-ember flex-shrink-0" />
             } else if (isCorrectOption) {
-              borderColor = 'border-green-400'
-              bgColor = 'bg-green-50'
-              textColor = 'text-green-900'
-              icon = <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+              borderColor = 'border-aurora-green'
+              bgColor = 'bg-aurora-green/10'
+              textColor = 'text-midnight'
+              icon = <CheckCircle2 className="w-5 h-5 text-accent-700 flex-shrink-0" />
             } else {
               bgColor = 'bg-surface-50'
-              textColor = 'text-surface-400'
+              textColor = 'text-surface-500'
             }
           }
 
@@ -75,7 +71,7 @@ export default function ScenarioCard({ situation, options }: ScenarioCardProps) 
               onClick={() => handleSelect(index)}
               disabled={hasAnswered}
               className={`
-                w-full text-left px-4 py-3 rounded-lg border transition-all duration-200
+                w-full text-left px-4 py-3.5 rounded-xl border transition-all duration-200
                 ${borderColor} ${bgColor} ${textColor} ${cursor}
                 flex items-center gap-3
               `}
@@ -98,22 +94,19 @@ export default function ScenarioCard({ situation, options }: ScenarioCardProps) 
         `}
       >
         <div className={`
-          mx-6 mb-6 p-4 rounded-lg
+          mx-6 mb-6 p-4 rounded-xl border-l-[3px]
           ${selectedCorrectly
-            ? 'bg-green-50 border border-green-200'
-            : 'bg-amber-50 border border-amber-200'
+            ? 'bg-aurora-green/10 border-aurora-green'
+            : 'bg-ember/10 border-ember'
           }
         `}>
           <p className={`
-            text-sm font-semibold mb-1
-            ${selectedCorrectly ? 'text-green-800' : 'text-amber-800'}
+            text-[11px] font-bold tracking-[0.15em] uppercase mb-1.5
+            ${selectedCorrectly ? 'text-accent-700' : 'text-ember'}
           `}>
-            {selectedCorrectly ? 'Correct!' : 'Not quite — here\'s the right approach:'}
+            {selectedCorrectly ? 'Correct' : 'Not quite — here\'s the right approach'}
           </p>
-          <p className={`
-            text-sm leading-relaxed
-            ${selectedCorrectly ? 'text-green-700' : 'text-amber-700'}
-          `}>
+          <p className="text-sm leading-relaxed text-midnight">
             {hasAnswered ? options[correctIndex].explanation : ''}
           </p>
         </div>
