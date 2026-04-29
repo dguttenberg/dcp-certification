@@ -82,14 +82,18 @@ export default function ToolGrid({ tools }: ToolGridProps) {
 
               <div
                 className={`
-                  overflow-hidden transition-all duration-300 ease-out
-                  ${isExpanded ? 'max-h-64 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}
+                  grid transition-all duration-300 ease-out
+                  ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}
                 `}
               >
-                <div className="pt-3 border-t border-aurora-violet/20">
-                  <p className="text-sm text-surface-700 leading-relaxed">
-                    {tool.detail}
-                  </p>
+                <div className="overflow-hidden">
+                  <div className="pt-3 border-t border-aurora-violet/20 space-y-3">
+                    {tool.detail.split('\n\n').map((para, i) => (
+                      <p key={i} className="text-sm text-surface-700 leading-relaxed">
+                        {para}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

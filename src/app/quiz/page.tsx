@@ -40,9 +40,25 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [slideDirection, setSlideDirection] = useState<'enter' | 'exit'>('enter')
+  // Shuffled option order keyed by question id, regenerated per attempt.
+  const [shuffledOptions, setShuffledOptions] = useState<Record<string, string[]>>({})
 
   const currentQuestion = quizQuestions[currentIndex]
   const isLastQuestion = currentIndex === TOTAL_QUESTIONS - 1
+  const currentOptions = currentQuestion ? (shuffledOptions[currentQuestion.id] ?? currentQuestion.options) : []
+
+  function shuffleAllOptions() {
+    const next: Record<string, string[]> = {}
+    for (const q of quizQuestions) {
+      const arr = [...q.options]
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[arr[i], arr[j]] = [arr[j], arr[i]]
+      }
+      next[q.id] = arr
+    }
+    setShuffledOptions(next)
+  }
 
   const results = useMemo(() => {
     if (stage !== 'results') return null
@@ -72,6 +88,7 @@ export default function QuizPage() {
   }, [stage, answers])
 
   const handleBegin = useCallback(() => {
+    shuffleAllOptions()
     setStage('active')
     setCurrentIndex(0)
     setAnswers({})
@@ -199,7 +216,7 @@ export default function QuizPage() {
             </h2>
 
             <div className="space-y-3">
-              {currentQuestion.options.map((option) => {
+              {currentOptions.map((option) => {
                 const isSelected = selectedOption === option
                 return (
                   <button
@@ -243,29 +260,76 @@ export default function QuizPage() {
 
   // RESULTS — PASS
   if (stage === 'results' && results?.passed) {
+    const hasMisses = results.incorrect.length > 0
+
     return (
-      <div className="min-h-screen dcp-gradient-dark flex items-center justify-center p-6">
-        <div className="w-full max-w-xl text-center relative z-10">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-aurora-green">
-            <CheckCircle2 className="h-10 w-10 text-midnight" strokeWidth={2.5} />
+      <div className="min-h-screen dcp-gradient-dark py-12 px-6">
+        <div className="mx-auto max-w-2xl relative z-10">
+          <div className="text-center">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-aurora-green">
+              <CheckCircle2 className="h-10 w-10 text-midnight" strokeWidth={2.5} />
+            </div>
+            <span className="dcp-eyebrow dcp-eyebrow--green">You passed</span>
+            <h1 className="mt-3 text-4xl md:text-5xl font-bold uppercase tracking-tight text-white">
+              Well done.
+            </h1>
+            <p className="mt-4 text-xl text-white/80">
+              {results.correct}/{TOTAL_QUESTIONS} correct
+            </p>
+            <p className="mt-2 text-white/60">
+              You&apos;ve completed the DCP AI Foundations Certification.
+            </p>
+            <a
+              href="/certificate"
+              className="dcp-btn-primary mt-10"
+            >
+              View Your Certificate
+              <ChevronRight className="h-4 w-4" />
+            </a>
           </div>
-          <span className="dcp-eyebrow dcp-eyebrow--green">You passed</span>
-          <h1 className="mt-3 text-4xl md:text-5xl font-bold uppercase tracking-tight text-white">
-            Well done.
-          </h1>
-          <p className="mt-4 text-xl text-white/80">
-            {results.correct}/{TOTAL_QUESTIONS} correct
-          </p>
-          <p className="mt-2 text-white/60">
-            You've completed the DCP AI Foundations Certification.
-          </p>
-          <a
-            href="/certificate"
-            className="dcp-btn-primary mt-10"
-          >
-            View Your Certificate
-            <ChevronRight className="h-4 w-4" />
-          </a>
+
+          {hasMisses && (
+            <div className="mt-14">
+              <div className="text-center mb-6">
+                <span className="dcp-eyebrow text-white/70">Worth a look</span>
+                <h2 className="mt-2 text-2xl md:text-3xl font-bold text-white tracking-tight">
+                  What you missed
+                </h2>
+                <p className="mt-2 text-white/60 text-sm">
+                  You passed — but here&apos;s what to revisit so you don&apos;t miss it twice.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {results.incorrect.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur p-6"
+                  >
+                    <p className="font-bold text-white mb-4">{item.question}</p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-start gap-2">
+                        <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-ember" />
+                        <p className="text-white/80">
+                          <span className="font-semibold text-ember">Your answer: </span>
+                          {item.userAnswer || '(no answer)'}
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-aurora-green" />
+                        <p className="text-white/80">
+                          <span className="font-semibold text-aurora-green">Correct: </span>
+                          {item.correctAnswer}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      {item.explanation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
