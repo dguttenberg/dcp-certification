@@ -181,7 +181,7 @@ export default function LoginPage() {
               Enter your code
             </h1>
             <p className="mt-4 text-white/70 leading-relaxed">
-              We sent a 6-digit code to <strong className="text-white">{email}</strong>. Enter it below to access the admin panel.
+              We sent a sign-in code to <strong className="text-white">{email}</strong>. Enter it below to access the admin panel.
             </p>
 
             <form onSubmit={handleOtpSubmit} className="mt-8">
@@ -194,25 +194,25 @@ export default function LoginPage() {
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                pattern="\d{6}"
-                maxLength={6}
+                pattern="\d{4,10}"
+                maxLength={10}
                 value={code}
                 onChange={(e) => {
-                  setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                  setCode(e.target.value.replace(/\D/g, '').slice(0, 10))
                   if (error) setError(null)
                 }}
-                placeholder="123456"
+                placeholder="Enter code"
                 required
                 disabled={submitting}
                 autoFocus
-                className="w-full bg-white/5 border border-white/15 rounded-full text-white placeholder-white/30 px-6 py-4 text-2xl text-center tracking-[0.5em] font-bold tabular-nums focus:outline-none focus:border-aurora-green focus:bg-white/10 transition-colors disabled:opacity-60"
+                className="w-full bg-white/5 border border-white/15 rounded-full text-white placeholder-white/30 px-6 py-4 text-2xl text-center tracking-[0.35em] font-bold tabular-nums focus:outline-none focus:border-aurora-green focus:bg-white/10 transition-colors disabled:opacity-60"
               />
               {error && (
                 <p className="mt-4 text-sm text-ember leading-relaxed">{error}</p>
               )}
               <button
                 type="submit"
-                disabled={submitting || code.length !== 6}
+                disabled={submitting || code.length < 4}
                 className="dcp-btn-primary mt-6 w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (

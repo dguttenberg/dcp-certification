@@ -5,8 +5,14 @@ const PREFIX = 'dcp-cert-'
 // ---------------------------------------------------------------------------
 // Demo mode check
 // ---------------------------------------------------------------------------
+// Demo mode is only available in local development. Even if NEXT_PUBLIC_DEMO_MODE
+// gets set to 'true' on a production environment, it stays disabled — the
+// real Supabase-backed flow is the only path in prod.
 export function isDemo(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+  return (
+    process.env.NODE_ENV === 'development' &&
+    process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+  )
 }
 
 // ---------------------------------------------------------------------------

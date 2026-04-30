@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
   if (!email || !token) {
     return NextResponse.json({ error: 'Email and code required.' }, { status: 400 })
   }
-  if (!/^\d{6}$/.test(token)) {
-    return NextResponse.json({ error: 'Code must be 6 digits.' }, { status: 400 })
+  if (!/^\d{4,10}$/.test(token)) {
+    return NextResponse.json({ error: 'Code must be digits only.' }, { status: 400 })
   }
 
   // Re-check that this email is actually an admin (defence in depth).
