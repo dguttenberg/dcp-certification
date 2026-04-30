@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/lib/auth-context'
-import { isDemo, getSectionProgress, completeSection } from '@/lib/demo-store'
+import { fetchSectionProgress, recordSectionComplete } from '@/lib/data'
 import { sections } from '@/content/sections'
 import type {
   SectionCard,
@@ -47,18 +47,16 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
   const nextSection = sectionIndex < sections.length - 1 ? sections[sectionIndex + 1] : null
   const totalCards = section?.cards.length ?? 0
 
-  const checkProgress = useCallback(() => {
-    if (isDemo()) {
-      const progress = getSectionProgress()
-      const completedIds = new Set(progress.map((p) => p.section_id))
-      setIsCompleted(completedIds.has(sectionId))
+  const checkProgress = useCallback(async () => {
+    const progress = await fetchSectionProgress()
+    const completedIds = new Set(progress.map((p) => p.section_id))
+    setIsCompleted(completedIds.has(sectionId))
 
-      if (sectionIndex > 0) {
-        const prevSection = sections[sectionIndex - 1]
-        if (!completedIds.has(prevSection.id)) {
-          router.replace('/course')
-          return
-        }
+    if (sectionIndex > 0) {
+      const prevSection = sections[sectionIndex - 1]
+      if (!completedIds.has(prevSection.id)) {
+        router.replace('/course')
+        return
       }
     }
   }, [sectionId, sectionIndex, router])
@@ -109,11 +107,9 @@ export default function SectionPage({ params }: { params: { sectionId: string } 
     }, 200)
   }
 
-  function handleMarkComplete() {
-    if (isDemo()) {
-      completeSection(sectionId)
-      router.push('/course')
-    }
+  async function handleMarkComplete() {
+    await recordSectionComplete(sectionId)
+    router.push('/course')
   }
 
   if (loading || !user || !mounted) {

@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2, XCircle, ChevronRight, RotateCcw } from 'lucide-react'
 import { quizQuestions, PASS_THRESHOLD, TOTAL_QUESTIONS } from '@/content/quiz'
 import {
-  getSectionProgress,
-  getCompletion,
-  addQuizAttempt,
-  setCompletion,
-} from '@/lib/demo-store'
+  fetchSectionProgress,
+  fetchCompletion,
+  recordQuizAttempt,
+  recordCompletion,
+} from '@/lib/data'
 
 type Stage = 'intro' | 'active' | 'results'
 
@@ -22,17 +22,25 @@ export default function QuizPage() {
   const [gateChecked, setGateChecked] = useState(false)
 
   useEffect(() => {
-    const completion = getCompletion()
-    if (completion) {
-      router.replace('/certificate')
-      return
+    let cancelled = false
+    ;(async () => {
+      const completion = await fetchCompletion()
+      if (cancelled) return
+      if (completion) {
+        router.replace('/certificate')
+        return
+      }
+      const progress = await fetchSectionProgress()
+      if (cancelled) return
+      if (progress.length < REQUIRED_SECTIONS) {
+        router.replace('/course')
+        return
+      }
+      setGateChecked(true)
+    })()
+    return () => {
+      cancelled = true
     }
-    const progress = getSectionProgress()
-    if (progress.length < REQUIRED_SECTIONS) {
-      router.replace('/course')
-      return
-    }
-    setGateChecked(true)
   }, [router])
 
   const [stage, setStage] = useState<Stage>('intro')
@@ -100,7 +108,7 @@ export default function QuizPage() {
     setSelectedOption(option)
   }, [])
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     if (!selectedOption || !currentQuestion) return
 
     const updatedAnswers = { ...answers, [currentQuestion.id]: selectedOption }
@@ -113,15 +121,18 @@ export default function QuizPage() {
       })
       const passed = correct >= PASS_SCORE
 
-      const attempt = addQuizAttempt({
-        score: correct,
-        total: TOTAL_QUESTIONS,
-        passed,
-        answers: updatedAnswers,
-      })
-
-      if (passed) {
-        setCompletion(attempt.id)
+      try {
+        const attempt = await recordQuizAttempt({
+          score: correct,
+          total: TOTAL_QUESTIONS,
+          passed,
+          answers: updatedAnswers,
+        })
+        if (passed) {
+          await recordCompletion(attempt.id)
+        }
+      } catch (err) {
+        console.error('Quiz submission error:', err)
       }
 
       setStage('results')

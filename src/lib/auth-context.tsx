@@ -1,97 +1,112 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react'
 import type { User } from './types'
 import { isDemo, getDemoUser, resetDemoData } from './demo-store'
 
-// ---------------------------------------------------------------------------
-// Context shape
-// ---------------------------------------------------------------------------
+interface SignInResult {
+  ok: boolean
+  error?: string
+}
+
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  signIn: () => Promise<void>
+  signIn: (email: string) => Promise<SignInResult>
   signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
-  signIn: async () => {},
+  signIn: async () => ({ ok: false, error: 'not initialized' }),
   signOut: async () => {},
 })
 
 const DEMO_SIGNED_IN_KEY = 'dcp-cert-signed-in'
 
-// ---------------------------------------------------------------------------
-// Provider
-// ---------------------------------------------------------------------------
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Initialise on mount
+  // ---------- Initialise ----------
   useEffect(() => {
+    let cancelled = false
+
     async function init() {
       if (isDemo()) {
-        // Only restore user if they previously signed in
-        if (typeof window !== 'undefined' && localStorage.getItem(DEMO_SIGNED_IN_KEY) === 'true') {
+        if (
+          typeof window !== 'undefined' &&
+          localStorage.getItem(DEMO_SIGNED_IN_KEY) === 'true'
+        ) {
           setUser(getDemoUser())
         }
         setLoading(false)
         return
       }
 
-      // Production — check Supabase session
       try {
-        const { createClient } = await import('./supabase/client')
-        const supabase = createClient()
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-
-        if (session?.user) {
-          const meta = session.user.user_metadata ?? {}
-          setUser({
-            id: session.user.id,
-            email: session.user.email ?? '',
-            full_name: (meta.full_name as string) ?? '',
-            agency: (meta.agency as string) ?? '',
-            role: (meta.role as 'learner' | 'admin') ?? 'learner',
-            created_at: session.user.created_at,
-          })
+        const res = await fetch('/api/me', { cache: 'no-store' })
+        if (!cancelled && res.ok) {
+          const body = await res.json()
+          setUser(body.user ?? null)
         }
       } catch (err) {
         console.error('Auth init error:', err)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     init()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  // Sign in -------------------------------------------------------------------
-  const signIn = useCallback(async () => {
+  // ---------- Sign in ----------
+  const signIn = useCallback(async (email: string): Promise<SignInResult> => {
     if (isDemo()) {
       localStorage.setItem(DEMO_SIGNED_IN_KEY, 'true')
       setUser(getDemoUser())
-      return
+      return { ok: true }
     }
 
-    // Production — trigger SAML SSO via Supabase
+    const trimmed = email.trim().toLowerCase()
+    if (!trimmed) {
+      return { ok: false, error: 'Please enter your work email.' }
+    }
+
     try {
-      const { createClient } = await import('./supabase/client')
-      const supabase = createClient()
-      await supabase.auth.signInWithSSO({
-        domain: window.location.hostname,
+      const res = await fetch('/api/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmed }),
       })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        return {
+          ok: false,
+          error: body.error ?? 'Could not sign you in. Try again.',
+        }
+      }
+      const body = await res.json()
+      setUser(body.user ?? null)
+      return { ok: true }
     } catch (err) {
       console.error('Sign-in error:', err)
+      return { ok: false, error: 'Network error. Try again.' }
     }
   }, [])
 
-  // Sign out ------------------------------------------------------------------
+  // ---------- Sign out ----------
   const signOut = useCallback(async () => {
     if (isDemo()) {
       localStorage.removeItem(DEMO_SIGNED_IN_KEY)
@@ -101,13 +116,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { createClient } = await import('./supabase/client')
-      const supabase = createClient()
-      await supabase.auth.signOut()
-      setUser(null)
+      await fetch('/api/sign-out', { method: 'POST' })
     } catch (err) {
       console.error('Sign-out error:', err)
     }
+    setUser(null)
   }, [])
 
   return (
@@ -117,9 +130,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) {

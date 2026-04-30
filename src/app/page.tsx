@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { Mail, ChevronRight } from 'lucide-react'
 
 export default function LoginPage() {
   const { user, loading, signIn } = useAuth()
   const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && user) {
@@ -23,6 +27,21 @@ export default function LoginPage() {
   }
 
   if (user) return null
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    const trimmed = email.trim()
+    if (!trimmed) return
+    setError(null)
+    setSubmitting(true)
+    const result = await signIn(trimmed)
+    setSubmitting(false)
+    if (!result.ok) {
+      setError(result.error ?? 'Sign-in failed.')
+      return
+    }
+    router.replace('/course')
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden dcp-gradient-dark flex flex-col">
@@ -45,41 +64,73 @@ export default function LoginPage() {
 
       {/* Hero */}
       <main className="relative z-10 flex-1 flex items-center justify-center px-6 py-10">
-        <div className="max-w-3xl text-center animate-fade-in">
-          <span
-            className="dcp-eyebrow dcp-eyebrow--green animate-slide-up inline-block"
-            style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
-          >
+        <div className="w-full max-w-2xl text-center animate-fade-in">
+          <span className="dcp-eyebrow dcp-eyebrow--green inline-block">
             Mandatory Certification
           </span>
 
           <h1
-            className="mt-6 font-bold uppercase text-white leading-[0.95] tracking-tight animate-slide-up"
+            className="mt-6 font-bold uppercase text-white leading-[0.95] tracking-tight"
             style={{
               fontSize: 'clamp(48px, 9vw, 104px)',
               letterSpacing: '-0.02em',
-              animationDelay: '0.1s',
-              animationFillMode: 'both',
             }}
           >
             AI Foundations<br />
             <em className="not-italic text-aurora-green block">Certification</em>
           </h1>
 
-          <p
-            className="mt-8 text-base md:text-lg text-white/60 max-w-xl mx-auto leading-relaxed animate-slide-up"
-            style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
-          >
+          <p className="mt-8 text-base md:text-lg text-white/60 max-w-xl mx-auto leading-relaxed">
             Cut through the hype, understand what these tools actually do, and learn to use them responsibly on client work.
           </p>
 
-          <button
-            onClick={signIn}
-            className="dcp-btn-primary mt-12 animate-slide-up"
-            style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
-          >
-            Sign in with DCP
-          </button>
+          <form onSubmit={handleSubmit} className="mt-12 max-w-md mx-auto text-left">
+            <label
+              htmlFor="email"
+              className="block text-[11px] font-bold tracking-[0.15em] uppercase text-white/60 mb-3"
+            >
+              Sign in with your work email
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  if (error) setError(null)
+                }}
+                placeholder="you@doner.com"
+                required
+                disabled={submitting}
+                className="w-full bg-white/5 border border-white/15 rounded-full text-white placeholder-white/30 pl-11 pr-4 py-3 text-base focus:outline-none focus:border-aurora-green focus:bg-white/10 transition-colors disabled:opacity-60"
+              />
+            </div>
+            {error && (
+              <p className="mt-4 text-sm text-ember leading-relaxed">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={submitting || !email.trim()}
+              className="dcp-btn-primary mt-6 w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="w-3 h-3 border-2 border-midnight/30 border-t-midnight rounded-full animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                <>
+                  Continue
+                  <ChevronRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </main>
 

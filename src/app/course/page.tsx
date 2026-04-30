@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
-import { isDemo, getSectionProgress, getCompletion, setAdminMode, resetDemoData, isAdminMode } from '@/lib/demo-store'
+import { isDemo, setAdminMode, resetDemoData, isAdminMode } from '@/lib/demo-store'
+import { fetchSectionProgress, fetchCompletion } from '@/lib/data'
 import { sections } from '@/content/sections'
 import ProgressRing from '@/components/progress-ring'
 import { Check, Lock, ChevronRight, Award, Settings, Shield, RotateCcw, LogOut } from 'lucide-react'
@@ -16,11 +17,9 @@ export default function CoursePage() {
   const [showSettings, setShowSettings] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const refreshProgress = useCallback(() => {
-    if (isDemo()) {
-      const progress = getSectionProgress()
-      setCompletedIds(new Set(progress.map((p) => p.section_id)))
-    }
+  const refreshProgress = useCallback(async () => {
+    const progress = await fetchSectionProgress()
+    setCompletedIds(new Set(progress.map((p) => p.section_id)))
   }, [])
 
   useEffect(() => {
@@ -34,16 +33,19 @@ export default function CoursePage() {
   }, [user, loading, router])
 
   useEffect(() => {
-    if (user) {
-      refreshProgress()
-
-      if (isDemo()) {
-        const completion = getCompletion()
-        if (completion) {
-          router.replace('/certificate')
-          return
-        }
+    if (!user) return
+    let cancelled = false
+    ;(async () => {
+      const completion = await fetchCompletion()
+      if (cancelled) return
+      if (completion) {
+        router.replace('/certificate')
+        return
       }
+      await refreshProgress()
+    })()
+    return () => {
+      cancelled = true
     }
   }, [user, refreshProgress, router])
 
@@ -96,46 +98,48 @@ export default function CoursePage() {
                 Admin
               </Link>
             )}
-            {isDemo() && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="p-2 rounded-full text-white/60 hover:text-aurora-green hover:bg-white/5 transition-colors"
-                  aria-label="Settings"
-                >
-                  <Settings className="w-5 h-5" />
-                </button>
-                {showSettings && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowSettings(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-midnight border border-aurora-violet/30 rounded-xl shadow-xl py-1.5 z-20 animate-fade-in">
-                      <button
-                        onClick={handleToggleAdmin}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/80 hover:bg-aurora-violet/10 hover:text-aurora-green transition-colors text-left"
-                      >
-                        <Shield className="w-4 h-4 text-white/40" />
-                        {isAdminMode() ? 'Disable admin mode' : 'Enable admin mode'}
-                      </button>
-                      <button
-                        onClick={handleResetProgress}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/80 hover:bg-aurora-violet/10 hover:text-aurora-green transition-colors text-left"
-                      >
-                        <RotateCcw className="w-4 h-4 text-white/40" />
-                        Reset progress
-                      </button>
-                      <div className="border-t border-white/10 my-1" />
-                      <button
-                        onClick={signOut}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ember hover:bg-ember/10 transition-colors text-left"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Sign out
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            <div className="relative">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="p-2 rounded-full text-white/60 hover:text-aurora-green hover:bg-white/5 transition-colors"
+                aria-label="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+              {showSettings && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowSettings(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-midnight border border-aurora-violet/30 rounded-xl shadow-xl py-1.5 z-20 animate-fade-in">
+                    {isDemo() && (
+                      <>
+                        <button
+                          onClick={handleToggleAdmin}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/80 hover:bg-aurora-violet/10 hover:text-aurora-green transition-colors text-left"
+                        >
+                          <Shield className="w-4 h-4 text-white/40" />
+                          {isAdminMode() ? 'Disable admin mode' : 'Enable admin mode'}
+                        </button>
+                        <button
+                          onClick={handleResetProgress}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/80 hover:bg-aurora-violet/10 hover:text-aurora-green transition-colors text-left"
+                        >
+                          <RotateCcw className="w-4 h-4 text-white/40" />
+                          Reset progress
+                        </button>
+                        <div className="border-t border-white/10 my-1" />
+                      </>
+                    )}
+                    <button
+                      onClick={signOut}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ember hover:bg-ember/10 transition-colors text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>

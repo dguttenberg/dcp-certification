@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { generateMockAdminData, type MockAdminUser } from '@/lib/demo-store'
+import { isDemo, generateMockAdminData, type MockAdminUser } from '@/lib/demo-store'
 import {
   Users,
   Award,
@@ -47,11 +47,42 @@ export default function AdminPage() {
   const [sortKey, setSortKey] = useState<SortKey>('full_name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
   useEffect(() => {
-    if (!loading) {
+    if (loading) return
+    if (!user || user.role !== 'admin') return
+
+    let cancelled = false
+
+    if (isDemo()) {
       setData(generateMockAdminData())
+      return
     }
-  }, [loading])
+
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/users', { cache: 'no-store' })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          if (!cancelled) {
+            setFetchError(body.error ?? `Failed to load (${res.status}).`)
+          }
+          return
+        }
+        const body = await res.json()
+        if (cancelled) return
+        setData(body.users ?? [])
+      } catch (err) {
+        console.error('Admin fetch error:', err)
+        if (!cancelled) setFetchError('Network error.')
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [loading, user])
 
   // ---- Access gate ----
   if (loading) {
@@ -256,6 +287,12 @@ export default function AdminPage() {
             </div>
           ))}
         </div>
+
+        {fetchError && (
+          <div className="mb-6 rounded-xl border border-ember/40 bg-ember/10 p-4 text-sm text-ember">
+            {fetchError}
+          </div>
+        )}
 
         {/* Filter bar */}
         <div className="bg-white rounded-xl border border-surface-200 shadow-sm mb-6 p-4">

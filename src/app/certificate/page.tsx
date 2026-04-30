@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { getCompletion, isDemo, resetDemoData } from '@/lib/demo-store'
+import { fetchCompletion } from '@/lib/data'
+import { isDemo, resetDemoData } from '@/lib/demo-store'
 import type { Completion } from '@/lib/types'
 import { Download } from 'lucide-react'
 import jsPDF from 'jspdf'
@@ -25,15 +26,20 @@ export default function CertificatePage() {
 
   useEffect(() => {
     if (loading) return
-
-    const record = getCompletion()
-    if (!record) {
-      router.replace('/quiz')
-      return
+    let cancelled = false
+    ;(async () => {
+      const record = await fetchCompletion()
+      if (cancelled) return
+      if (!record) {
+        router.replace('/quiz')
+        return
+      }
+      setCompletion(record)
+      setReady(true)
+    })()
+    return () => {
+      cancelled = true
     }
-
-    setCompletion(record)
-    setReady(true)
   }, [loading, router])
 
   function handleDownload() {
