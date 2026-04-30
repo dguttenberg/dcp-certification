@@ -8,12 +8,13 @@ import { isDemo, setAdminMode, resetDemoData, isAdminMode } from '@/lib/demo-sto
 import { fetchSectionProgress, fetchCompletion } from '@/lib/data'
 import { sections } from '@/content/sections'
 import ProgressRing from '@/components/progress-ring'
-import { Check, Lock, ChevronRight, Award, Settings, Shield, RotateCcw, LogOut } from 'lucide-react'
+import { Check, Lock, ChevronRight, Award, Settings, Shield, RotateCcw, LogOut, Eye } from 'lucide-react'
 
 export default function CoursePage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
+  const [hasCompletion, setHasCompletion] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -38,16 +39,13 @@ export default function CoursePage() {
     ;(async () => {
       const completion = await fetchCompletion()
       if (cancelled) return
-      if (completion) {
-        router.replace('/certificate')
-        return
-      }
+      setHasCompletion(!!completion)
       await refreshProgress()
     })()
     return () => {
       cancelled = true
     }
-  }, [user, refreshProgress, router])
+  }, [user, refreshProgress])
 
   if (loading || !user || !mounted) {
     return (
@@ -147,32 +145,58 @@ export default function CoursePage() {
       <main className="max-w-4xl mx-auto px-6 py-10">
         {/* Hero / progress panel */}
         <div className="mb-10 animate-fade-in">
-          <span className="dcp-eyebrow">Welcome back</span>
+          <span className="dcp-eyebrow">
+            {hasCompletion ? 'Certified' : 'Welcome back'}
+          </span>
           <h1 className="mt-2 text-3xl md:text-5xl font-bold uppercase tracking-tight text-midnight">
-            Hi, {firstName}.
+            {hasCompletion ? `Nice work, ${firstName}.` : `Hi, ${firstName}.`}
           </h1>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-6 bg-midnight rounded-2xl p-8 border border-aurora-violet/30 animate-fade-in">
-          <ProgressRing
-            progress={progress}
-            size={110}
-            strokeWidth={8}
-            label={`${completedCount}/${totalSections}`}
-          />
-          <div className="text-center sm:text-left">
-            <h2 className="text-sm font-semibold tracking-[0.2em] uppercase text-aurora-green">
-              Your Progress
-            </h2>
-            <p className="mt-2 text-lg text-white/80 leading-relaxed">
-              {completedCount === 0
-                ? 'Start your AI Foundations journey below.'
-                : completedCount === totalSections
-                  ? 'All sections complete. Ready for the quiz.'
-                  : `${completedCount} of ${totalSections} sections completed.`}
-            </p>
+        {hasCompletion ? (
+          <div className="relative overflow-hidden flex flex-col sm:flex-row items-center gap-6 bg-midnight rounded-2xl p-8 border border-aurora-green/40 animate-fade-in">
+            <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-aurora-green/10 blur-3xl pointer-events-none" />
+            <div className="relative flex-shrink-0 w-[110px] h-[110px] rounded-full bg-aurora-green flex items-center justify-center">
+              <Award className="w-12 h-12 text-midnight" strokeWidth={2} />
+            </div>
+            <div className="relative text-center sm:text-left flex-1">
+              <h2 className="text-sm font-semibold tracking-[0.2em] uppercase text-aurora-green">
+                You&apos;re Certified
+              </h2>
+              <p className="mt-2 text-lg text-white/80 leading-relaxed">
+                You&apos;ve completed the DCP AI Foundations Certification. Revisit any section below to refresh — you&apos;ll keep your certificate either way.
+              </p>
+              <Link
+                href="/certificate"
+                className="dcp-btn-primary mt-5"
+              >
+                <Award className="w-4 h-4" />
+                View Certificate
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-center gap-6 bg-midnight rounded-2xl p-8 border border-aurora-violet/30 animate-fade-in">
+            <ProgressRing
+              progress={progress}
+              size={110}
+              strokeWidth={8}
+              label={`${completedCount}/${totalSections}`}
+            />
+            <div className="text-center sm:text-left">
+              <h2 className="text-sm font-semibold tracking-[0.2em] uppercase text-aurora-green">
+                Your Progress
+              </h2>
+              <p className="mt-2 text-lg text-white/80 leading-relaxed">
+                {completedCount === 0
+                  ? 'Start your AI Foundations journey below.'
+                  : completedCount === totalSections
+                    ? 'All sections complete. Ready for the quiz.'
+                    : `${completedCount} of ${totalSections} sections completed.`}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Section cards */}
         <div className="mt-8 space-y-3">
@@ -222,7 +246,12 @@ export default function CoursePage() {
                       </div>
 
                       <div className="flex-shrink-0">
-                        {isCompleted ? (
+                        {hasCompletion && isCompleted ? (
+                          <span className="flex items-center gap-1 text-[11px] font-bold tracking-[0.15em] uppercase text-aurora-violet">
+                            <Eye className="w-3.5 h-3.5" />
+                            Review
+                          </span>
+                        ) : isCompleted ? (
                           <span className="text-[10px] font-bold tracking-[0.15em] text-accent-700 bg-aurora-green/15 px-3 py-1.5 rounded-full uppercase">
                             Done
                           </span>
@@ -252,12 +281,29 @@ export default function CoursePage() {
           })}
         </div>
 
-        {/* Quiz card */}
+        {/* Quiz / Certificate card */}
         <div
           className="mt-8 animate-slide-up"
           style={{ animationDelay: `${sections.length * 0.06}s`, animationFillMode: 'both' }}
         >
-          {allComplete ? (
+          {hasCompletion ? (
+            <Link href="/certificate" className="block group">
+              <div className="relative overflow-hidden flex items-center gap-5 bg-midnight rounded-xl p-6 text-white border border-aurora-green/40 shadow-lg transition-all duration-200 hover:border-aurora-green">
+                <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-aurora-green/10 blur-3xl" />
+                <div className="relative flex-shrink-0 w-14 h-14 rounded-xl bg-aurora-green text-midnight flex items-center justify-center">
+                  <Award className="w-6 h-6" />
+                </div>
+                <div className="relative flex-1">
+                  <span className="dcp-eyebrow dcp-eyebrow--green">Already certified</span>
+                  <h3 className="mt-1 font-bold text-lg uppercase tracking-tight">View Your Certificate</h3>
+                  <p className="text-white/60 text-sm mt-0.5">
+                    Download a copy or revisit any of the sections above.
+                  </p>
+                </div>
+                <ChevronRight className="relative w-6 h-6 text-aurora-green group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
+          ) : allComplete ? (
             <Link href="/quiz" className="block group">
               <div className="relative overflow-hidden flex items-center gap-5 bg-midnight rounded-xl p-6 text-white border border-aurora-green/40 shadow-lg transition-all duration-200 hover:border-aurora-green">
                 <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-aurora-green/10 blur-3xl" />

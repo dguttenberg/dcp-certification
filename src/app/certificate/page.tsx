@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { fetchCompletion } from '@/lib/data'
 import { isDemo, resetDemoData } from '@/lib/demo-store'
 import type { Completion } from '@/lib/types'
-import { Download } from 'lucide-react'
+import { Download, ChevronLeft, LogOut } from 'lucide-react'
 import jsPDF from 'jspdf'
 
 function formatDate(iso: string): string {
@@ -20,7 +21,7 @@ function formatDate(iso: string): string {
 
 export default function CertificatePage() {
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const [completion, setCompletion] = useState<Completion | null>(null)
   const [ready, setReady] = useState(false)
 
@@ -139,7 +140,33 @@ export default function CertificatePage() {
   if (!completion || !user) return null
 
   return (
-    <div className="min-h-screen bg-offwhite py-12 px-4 flex flex-col items-center">
+    <div className="min-h-screen bg-offwhite flex flex-col">
+      {/* Header */}
+      <header className="bg-midnight sticky top-0 z-30 border-b border-aurora-green/10">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
+          <Link
+            href="/course"
+            className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.15em] uppercase text-white/60 hover:text-aurora-green transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back to Course
+          </Link>
+          <div className="dcp-logo">
+            <span className="dcp-logo-mark">DCP</span>
+            <span className="dcp-logo-wordmark">Doner<br />Colle<br />Partners.</span>
+          </div>
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.15em] uppercase text-white/60 hover:text-ember transition-colors"
+            aria-label="Sign out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sign out</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 py-12 px-4 flex flex-col items-center">
       {/* Certificate card */}
       <div className="w-full max-w-2xl relative bg-midnight border border-aurora-green/30 rounded-2xl shadow-2xl p-8 md:p-12 overflow-hidden animate-fade-in">
         {/* Atmospheric accents */}
@@ -220,6 +247,7 @@ export default function CertificatePage() {
             Reset progress &amp; start over (demo)
           </button>
         )}
+      </div>
       </div>
     </div>
   )
