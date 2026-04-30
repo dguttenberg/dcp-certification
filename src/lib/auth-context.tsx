@@ -14,12 +14,20 @@ import { isDemo, getDemoUser, resetDemoData } from './demo-store'
 interface SignInResult {
   ok: boolean
   error?: string
+  /** When set, the caller must follow up with verifyOtp before a session is created. */
+  challenge?: 'otp'
+}
+
+interface VerifyResult {
+  ok: boolean
+  error?: string
 }
 
 interface AuthContextValue {
   user: User | null
   loading: boolean
   signIn: (email: string) => Promise<SignInResult>
+  verifyOtp: (email: string, token: string) => Promise<VerifyResult>
   signOut: () => Promise<void>
 }
 
@@ -27,6 +35,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
   signIn: async () => ({ ok: false, error: 'not initialized' }),
+  verifyOtp: async () => ({ ok: false, error: 'not initialized' }),
   signOut: async () => {},
 })
 
@@ -98,6 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       const body = await res.json()
+      if (body.challenge === 'otp') {
+        return { ok: true, challenge: 'otp' }
+      }
       setUser(body.user ?? null)
       return { ok: true }
     } catch (err) {
@@ -105,6 +117,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: 'Network error. Try again.' }
     }
   }, [])
+
+  // ---------- Verify OTP (admin only) ----------
+  const verifyOtp = useCallback(
+    async (email: string, token: string): Promise<VerifyResult> => {
+      const trimmedEmail = email.trim().toLowerCase()
+      const trimmedToken = token.trim().replace(/\s+/g, '')
+
+      try {
+        const res = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: trimmedEmail, token: trimmedToken }),
+        })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          return {
+            ok: false,
+            error: body.error ?? 'Verification failed.',
+          }
+        }
+        const body = await res.json()
+        setUser(body.user ?? null)
+        return { ok: true }
+      } catch (err) {
+        console.error('Verify OTP error:', err)
+        return { ok: false, error: 'Network error. Try again.' }
+      }
+    },
+    []
+  )
 
   // ---------- Sign out ----------
   const signOut = useCallback(async () => {
@@ -124,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   )

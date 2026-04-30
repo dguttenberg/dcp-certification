@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminClient } from '@/lib/server-supabase'
+import { adminClient, anonClient } from '@/lib/server-supabase'
 import { setSessionCookie } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Supabase config error:', err)
     return NextResponse.json(
-      { error: 'Server is misconfigured. Contact your producer.' },
+      { error: 'Sign-in is temporarily unavailable. Please try again in a few minutes.' },
       { status: 500 }
     )
   }
@@ -47,21 +47,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "We don't see this email on the certification roster. If you think this is wrong, contact your producer or department lead.",
+          "We don't see this email on the certification roster. Double-check the address you used, or reach out to the certification administrator if you believe this is a mistake.",
       },
       { status: 404 }
     )
   }
 
-  setSessionCookie(employee.email as string)
+  // Admins must verify with a one-time code sent to their email.
+  // Learners get the cookie immediately.
+  if (employee.is_admin) {
+    const { error: otpError } = await anonClient().auth.signInWithOtp({
+      email: employee.email as string,
+      options: { shouldCreateUser: true },
+    })
+    if (otpError) {
+      console.error('OTP send error:', otpError)
+      return NextResponse.json(
+        { error: 'Could not send verification code. Try again in a minute.' },
+        { status: 500 }
+      )
+    }
+    return NextResponse.json({
+      challenge: 'otp',
+      email: employee.email,
+    })
+  }
 
+  setSessionCookie(employee.email as string)
   return NextResponse.json({
     user: {
       id: employee.id,
       email: employee.email,
       full_name: employee.full_name,
       agency: employee.agency,
-      role: employee.is_admin ? 'admin' : 'learner',
+      role: 'learner',
       created_at: employee.created_at,
     },
   })
