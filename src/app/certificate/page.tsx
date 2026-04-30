@@ -112,22 +112,11 @@ export default function CertificatePage() {
     doc.setTextColor(220, 222, 232)
     doc.text(formatDate(completion.completed_at), centerX, 172, { align: 'center' })
 
-    // Divider
-    doc.setDrawColor(84, 93, 255)
-    doc.setLineWidth(0.4)
-    doc.line(centerX - 50, 190, centerX + 50, 190)
-
-    // Signatory
-    doc.setFont('helvetica', 'italic')
-    doc.setFontSize(16)
-    doc.setTextColor(255, 255, 255)
-    doc.text('Doug Guttenberg', centerX, 210, { align: 'center' })
-
+    // Issuer
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
+    doc.setFontSize(10)
     doc.setTextColor(200, 202, 210)
-    doc.text('EVP, AI INNOVATION & DELIVERY', centerX, 218, { align: 'center' })
-    doc.text('DonerColle Partners', centerX, 224, { align: 'center' })
+    doc.text('Issued by DonerColle Partners', centerX, 200, { align: 'center' })
 
     // Certificate ID
     doc.setFont('courier', 'normal')
@@ -195,25 +184,13 @@ export default function CertificatePage() {
             DCP AI Foundations Certification
           </h3>
 
-          <p className="text-center text-sm text-white/70 mb-8">
+          <p className="text-center text-sm text-white/70 mb-10">
             {formatDate(completion.completed_at)}
           </p>
 
-          <div className="flex justify-center mb-8">
-            <div className="w-24 h-px bg-aurora-violet/40" />
-          </div>
-
-          <div className="text-center mb-8">
-            <p className="text-lg italic text-white mb-1">
-              Doug Guttenberg
-            </p>
-            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-aurora-violet">
-              EVP, AI Innovation & Delivery
-            </p>
-            <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-white/50 mt-0.5">
-              DonerColle Partners
-            </p>
-          </div>
+          <p className="text-center text-[11px] font-semibold tracking-[0.15em] uppercase text-white/60 mb-6">
+            Issued by DonerColle Partners
+          </p>
 
           <p className="text-center text-[10px] font-mono text-white/30">
             Certificate ID: {completion.id}
