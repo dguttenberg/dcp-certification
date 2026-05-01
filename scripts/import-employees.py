@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Import the Doner employee roster from xlsx into Supabase.
+"""Import an employee roster (Doner or Colle McVoy) from xlsx into Supabase.
 
 Usage:
     python3 scripts/import-employees.py [path-to-xlsx]
 
-Defaults to ~/Downloads/Employee List 4.23.26.xlsx.
+Defaults to ~/Downloads/Employee List 4.23.26.xlsx. Pass any other roster
+file as the first argument. The script auto-detects the column schema and
+derives the agency from each email address's domain, so the same script
+works for any new agency you add.
 
 Reads NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY from .env.local.
 The xlsx itself is read by absolute path and never copied into the repo.
@@ -47,7 +50,22 @@ def load_env_local(path: Path = Path(".env.local")) -> None:
         os.environ.setdefault(key, value)
 
 
+def agency_from_email(email: str) -> str:
+    """Map an email domain to an agency name."""
+    domain = email.split("@", 1)[-1].lower()
+    if domain in {"doner.com", "donercx.com", "donerpartnersnetwork.com"}:
+        return "Doner"
+    if domain == "collemcvoy.com":
+        return "Colle McVoy"
+    return "Unknown"
+
+
 def parse_xlsx(path: Path) -> list[dict]:
+    """Parse an employee xlsx with either of the supported schemas:
+
+    - Doner: 'Email Address' + 'Employee Name (First MI Last Suffix)' + 'Job Title'
+    - Colle McVoy: 'Email Address' + 'First Name' + 'Last Name' + 'Department'
+    """
     wb = openpyxl.load_workbook(path, data_only=True)
     ws = wb.active
     rows = list(ws.iter_rows(values_only=True))
@@ -56,34 +74,57 @@ def parse_xlsx(path: Path) -> list[dict]:
 
     header = [str(h or "").strip() for h in rows[0]]
 
-    def col(name: str) -> int:
-        for i, h in enumerate(header):
-            if h.lower() == name.lower():
-                return i
-        raise ValueError(f"Column {name!r} not found in {header}")
+    def find_col(candidates: list[str]) -> int:
+        for cand in candidates:
+            for i, h in enumerate(header):
+                if h.lower() == cand.lower():
+                    return i
+        return -1
 
-    email_idx = col("Email Address")
-    name_idx = col("Employee Name (First MI Last Suffix)")
-    title_idx = col("Job Title")
+    email_idx = find_col(["Email Address", "Email"])
+    full_name_idx = find_col([
+        "Employee Name (First MI Last Suffix)",
+        "Full Name",
+        "Name",
+    ])
+    first_name_idx = find_col(["First Name", "FirstName"])
+    last_name_idx = find_col(["Last Name", "LastName"])
+    title_idx = find_col(["Job Title", "Title"])
+    dept_idx = find_col(["Department", "Dept"])
+
+    if email_idx == -1:
+        raise ValueError(f"Couldn't find an Email column in {header}")
+    if full_name_idx == -1 and (first_name_idx == -1 or last_name_idx == -1):
+        raise ValueError(
+            f"Couldn't find name columns. Need 'Employee Name' OR ('First Name' + 'Last Name'). Header: {header}"
+        )
 
     out: list[dict] = []
     for row in rows[1:]:
-        email_raw = row[email_idx] if email_idx < len(row) else None
-        name_raw = row[name_idx] if name_idx < len(row) else None
-        title_raw = row[title_idx] if title_idx < len(row) else None
+        def cell(idx: int) -> str:
+            if idx < 0 or idx >= len(row):
+                return ""
+            return str(row[idx] or "").strip()
 
-        email = str(email_raw or "").strip().lower()
-        name = str(name_raw or "").strip()
-        title = str(title_raw or "").strip()
-
-        if not email or "@" not in email or not name:
+        email = cell(email_idx).lower()
+        if not email or "@" not in email:
             continue
+
+        if full_name_idx >= 0:
+            name = cell(full_name_idx)
+        else:
+            name = f"{cell(first_name_idx)} {cell(last_name_idx)}".strip()
+        if not name:
+            continue
+
+        # Job title falls back to department when the file doesn't have a title column.
+        title = cell(title_idx) if title_idx >= 0 else cell(dept_idx)
 
         out.append({
             "email": email,
             "full_name": name,
             "job_title": title or None,
-            "agency": "Doner",
+            "agency": agency_from_email(email),
         })
     return out
 
